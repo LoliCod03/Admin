@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz – Introducción a la Administración</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F4F2EC; --surface: #FFFFFF; --surface2: #F8F7F2;
+    --navy: #1B2A4A; --navy-light: #E8EBF2;
+    --gold: #C9922A; --gold-light: #FAF0DC;
+    --green: #639922; --green-light: #EAF3DE; --green-dark: #27500A;
+    --red: #E24B4A; --red-light: #FCEBEB; --red-dark: #501313;
+    --gray-100: #D3D1C7; --gray-200: #B4B2A9;
+    --text: #1a1a18; --text-muted: #6b6b68;
+    --radius: 14px; --radius-sm: 8px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem 4rem; }
+  .container { width: 100%; max-width: 700px; }
+  .site-header { text-align: center; margin-bottom: 2rem; padding-top: 1rem; }
+  .badge { display: inline-block; background: var(--gold-light); color: #7A4F0A; font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 14px; border-radius: 999px; border: 1px solid #E8C577; margin-bottom: 12px; }
+  .site-header h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; line-height: 1.2; }
+  .site-header p { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .start-card { background: var(--surface); border: 1px solid var(--gray-100); border-radius: var(--radius); padding: 3rem 2rem; text-align: center; }
+  .start-icon { font-size: 60px; margin-bottom: 1.25rem; display: block; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .start-card h2 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .start-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6; }
+  .stats-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 2rem; flex-wrap: wrap; }
+  .stat-pill { background: var(--surface2); border: 1px solid var(--gray-100); border-radius: 999px; padding: 6px 16px; font-size: 13px; color: var(--text-muted); }
+  .stat-pill strong { color: var(--text); }
+  .btn-start { display: inline-block; background: var(--navy); color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; padding: 14px 40px; border-radius: 999px; border: none; cursor: pointer; transition: transform 0.15s, background 0.15s; letter-spacing: 0.02em; }
+  .btn-start:hover { background: #2a3e6a; transform: scale(1.03); }
+  .game-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .prog-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .score-chip { background: var(--surface); border: 1px solid var(--gray-100); border-radius: 999px; padding: 5px 14px; font-size: 13px; font-weight: 500; }
+  .score-chip span { color: var(--gold); font-family: 'Syne', sans-serif; font-weight: 700; }
+  .progress-track { height: 6px; background: var(--gray-100); border-radius: 3px; margin-bottom: 1.25rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--navy), var(--gold)); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+  .question-card { background: var(--surface); border: 1px solid var(--gray-100); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; }
+  .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .q-num { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold); font-family: 'Syne', sans-serif; }
+  .q-theme { font-size: 11px; color: var(--text-muted); background: var(--surface2); padding: 3px 10px; border-radius: 999px; }
+  .q-text { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; line-height: 1.55; color: var(--text); }
+  .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  @media (max-width: 480px) { .answers-grid { grid-template-columns: 1fr; } }
+  .answer-btn { display: flex; align-items: flex-start; gap: 10px; padding: 13px 14px; background: var(--surface); border: 1px solid var(--gray-100); border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--text); text-align: left; line-height: 1.5; transition: border-color 0.15s, background 0.15s, transform 0.1s; }
+  .answer-btn:hover:not(:disabled) { border-color: var(--gray-200); background: var(--surface2); }
+  .answer-btn:active:not(:disabled) { transform: scale(0.98); }
+  .answer-btn:disabled { cursor: default; }
+  .ans-icon { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; font-family: 'Syne', sans-serif; flex-shrink: 0; }
+  .icon-a { background: #CECBF6; color: #3C3489; }
+  .icon-b { background: #9FE1CB; color: #085041; }
+  .icon-c { background: #FAC775; color: #633806; }
+  .icon-d { background: #F5C4B3; color: #712B13; }
+  .answer-btn.correct { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+  .answer-btn.wrong { background: var(--red-light); border-color: var(--red); color: var(--red-dark); }
+  .answer-btn.reveal-correct { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+  .feedback { border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; line-height: 1.6; margin-bottom: 1rem; display: none; }
+  .feedback.correct { background: var(--green-light); border: 1px solid var(--green); color: var(--green-dark); }
+  .feedback.wrong { background: var(--red-light); border: 1px solid var(--red); color: var(--red-dark); }
+  .btn-next { width: 100%; padding: 13px; border-radius: var(--radius-sm); border: 1px solid var(--gray-100); background: var(--surface); font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer; display: none; transition: background 0.15s; }
+  .btn-next:hover { background: var(--surface2); border-color: var(--gray-200); }
+  .end-card { background: var(--surface); border: 1px solid var(--gray-100); border-radius: var(--radius); padding: 2.5rem 2rem; text-align: center; }
+  .trophy { font-size: 56px; display: block; margin-bottom: 1rem; }
+  .end-score-big { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 4px; }
+  .end-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem; }
+  .end-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px 10px; }
+  .stat-val { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--text); }
+  .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .end-msg { font-size: 15px; color: var(--text); font-style: italic; margin-bottom: 1.75rem; }
+  .btn-restart { display: inline-block; background: var(--surface2); color: var(--text); border: 1px solid var(--gray-100); border-radius: 999px; padding: 12px 32px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+  .btn-restart:hover { background: var(--gray-100); }
+  .footer { text-align: center; margin-top: 2rem; font-size: 12px; color: var(--gray-200); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="site-header">
+    <div class="badge">🏢 Clase 1 · Administración</div>
+    <h1>Introducción a la Administración</h1>
+    <p>Profa. Paola González · Universidad Tecnológica de Panamá</p>
+  </header>
+
+  <div id="start-screen" class="screen active">
+    <div class="start-card">
+      <span class="start-icon">💼</span>
+      <h2>¿Listo para el quiz?</h2>
+      <p>Pon a prueba tus conocimientos sobre gerentes, funciones administrativas, roles de Mintzberg, ADN del gerente y glosario de administración.</p>
+      <div class="stats-row">
+        <div class="stat-pill"><strong>30</strong> preguntas</div>
+        <div class="stat-pill"><strong>3</strong> fuentes</div>
+        <div class="stat-pill">Orden <strong>aleatorio</strong></div>
+      </div>
+      <button class="btn-start" onclick="startGame()">¡Comenzar! →</button>
+    </div>
+  </div>
+
+  <div id="game-screen" class="screen">
+    <div class="game-top">
+      <span class="prog-label" id="prog-text">Pregunta 1 de 30</span>
+      <div class="score-chip">⭐ <span id="score-display">0</span> pts</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog-bar" style="width:3%"></div></div>
+    <div class="question-card">
+      <div class="q-meta">
+        <span class="q-num" id="q-num">Pregunta 1</span>
+        <span class="q-theme" id="q-theme"></span>
+      </div>
+      <div class="q-text" id="q-text"></div>
+    </div>
+    <div class="answers-grid" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-next" id="next-btn" onclick="nextQuestion()">Siguiente →</button>
+  </div>
+
+  <div id="end-screen" class="screen">
+    <div class="end-card">
+      <span class="trophy" id="trophy">🏆</span>
+      <div class="end-score-big" id="end-score"></div>
+      <div class="end-sub" id="end-sub"></div>
+      <div class="end-stats">
+        <div class="stat-card"><div class="stat-val" id="s-correct"></div><div class="stat-lbl">Correctas</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-wrong"></div><div class="stat-lbl">Incorrectas</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-pct"></div><div class="stat-lbl">Porcentaje</div></div>
+      </div>
+      <div class="end-msg" id="end-msg"></div>
+      <button class="btn-restart" onclick="restartGame()">↩ Volver a jugar</button>
+    </div>
+  </div>
+
+  <div class="footer">Quiz · Introducción a la Administración – Clase 1 · UTP</div>
+</div>
+
+<script>
+const allQuestions = [
+  // CLASE 1 – Conceptos básicos
+  { q: "¿Cuál es la definición de administración según la clase?", opts: ["El arte de maximizar las ganancias de una empresa","La coordinación y supervisión de las actividades laborales de otros para que se lleven a cabo de forma eficiente y eficaz","El proceso de contratar y despedir personal","La planificación exclusiva de recursos financieros"], ans: 1, exp: "La administración es la coordinación y supervisión de las actividades laborales de otros para que se lleven a cabo de forma eficiente y eficaz.", tema: "Clase 1" },
+  { q: "¿Qué significa 'eficiencia' en administración?", opts: ["Lograr los objetivos de la organización a cualquier costo","Obtener los mejores resultados a partir de la menor cantidad de recursos","Hacer las cosas correctas sin importar el costo","Supervisar el trabajo de los empleados constantemente"], ans: 1, exp: "Eficiencia significa 'hacer bien las cosas': obtener los mejores resultados a partir de la menor cantidad de recursos.", tema: "Clase 1" },
+  { q: "¿Qué significa 'eficacia' en administración?", opts: ["Reducir al mínimo el uso de recursos","Hacer bien las cosas en el menor tiempo posible","Lograr los objetivos de la organización; hacer las cosas correctas","Supervisar y controlar a todos los empleados"], ans: 2, exp: "Eficacia significa 'hacer las cosas correctas': lograr los objetivos de la organización.", tema: "Clase 1" },
+  { q: "¿Cuál es la función del gerente según el libro de clase?", opts: ["Realizar el trabajo operativo directamente","Coordinar, supervisar y dirigir el trabajo de otras personas para que se logren los objetivos","Administrar únicamente los recursos financieros","Representar a la empresa ante los medios de comunicación"], ans: 1, exp: "Un gerente coordina, supervisa y dirige el trabajo de otras personas para que se logren los objetivos de la organización.", tema: "Clase 1" },
+  { q: "¿Cuáles son los cuatro niveles de la clasificación de gerentes?", opts: ["CEO, VP, Director y Empleado","Directores, Gerentes de nivel medio, Gerentes de primera línea y Empleados no administrativos","Presidente, Gerente, Supervisor y Operario","Alta dirección, Dirección media, Supervisión y Producción"], ans: 1, exp: "Los niveles son: Directores (decisiones estratégicas), Gerentes de nivel medio, Gerentes de primera línea y Empleados no administrativos.", tema: "Clase 1" },
+  { q: "¿Cuáles son las cuatro funciones principales de la administración?", opts: ["Planificar, Contratar, Motivar y Controlar","Planeación, Organización, Dirección y Control","Estrategia, Táctica, Operación y Evaluación","Liderazgo, Comunicación, Delegación y Supervisión"], ans: 1, exp: "Las cuatro funciones administrativas son: Planeación (definir objetivos), Organización (definir estructura), Dirección (motivar y guiar) y Control (dar seguimiento y corregir).", tema: "Clase 1" },
+  { q: "¿Cuáles son los tres enfoques para describir lo que hacen los gerentes?", opts: ["Estrategia, táctica y operación","Funciones que realizan, habilidades que necesitan y roles que desempeñan","Planificación, ejecución y evaluación","Liderazgo, comunicación y toma de decisiones"], ans: 1, exp: "Los tres enfoques para describir lo que hacen los gerentes son: las funciones que realizan, las habilidades que necesitan y los roles que desempeñan.", tema: "Clase 1" },
+  { q: "¿Qué es una organización según la clase?", opts: ["Un grupo de personas con intereses comunes","Una asociación deliberada de personas para cumplir finalidades que los individuos no podrían lograr de manera independiente","Una empresa lucrativa con estructura jerárquica","Un conjunto de reglas y procedimientos empresariales"], ans: 1, exp: "Una organización es una asociación deliberada de personas para cumplir determinadas finalidades que los individuos de manera independiente no podrían lograr.", tema: "Clase 1" },
+  { q: "¿Cuál es una característica de la nueva organización (comparada con la tradicional)?", opts: ["Estable e inflexible","Centrada en el trabajo y los puestos permanentes","Dinámica, flexible y centrada en las habilidades","Orientada a órdenes jerárquicas y personal homogéneo"], ans: 2, exp: "La nueva organización es dinámica y flexible, centrada en habilidades, con trabajo definido por tareas, equipos y empleados que participan en las decisiones.", tema: "Clase 1" },
+
+  // ADN DEL GERENTE
+  { q: "¿Qué obra publicó Frederick W. Taylor en 1911 que marcó el inicio de la administración científica?", opts: ["La riqueza de las naciones","El arte de la guerra","Principios de la administración científica","Teoría general de la administración"], ans: 2, exp: "En 1911, Frederick W. Taylor publicó 'Principios de la administración científica', buscando 'the one best way' para optimizar la eficiencia.", tema: "ADN del Gerente" },
+  { q: "¿Cuáles son los cuatro principios del enfoque de Taylor?", opts: ["Planear, organizar, dirigir y controlar","Ciencia vs. Regla de Oro, Selección Científica, Cooperación Total y División Equitativa","Motivación, comunicación, liderazgo y control","Eficiencia, eficacia, productividad y calidad"], ans: 1, exp: "Los cuatro engranajes de Taylor son: Ciencia vs. Regla de Oro (método científico), Selección Científica, Cooperación Total entre gerencia y empleados, y División Equitativa de responsabilidades.", tema: "ADN del Gerente" },
+  { q: "¿En qué se diferencia el enfoque gerencial de 1911 ('La Era de la Máquina') del enfoque actual?", opts: ["No hay diferencia, los principios son iguales","1911: eficiencia mecánica, trabajador como engranaje. Hoy: innovación, empatía, trabajador como motor de creatividad","1911: trabajo en equipo. Hoy: trabajo individual","1911: tecnología digital. Hoy: trabajo manual"], ans: 1, exp: "En 1911 el enfoque era eficiencia mecánica y tiempos muertos, viendo al trabajador como engranaje optimizable. Hoy el enfoque es innovación, empatía y adaptabilidad, viendo al trabajador como motor del servicio al cliente y la creatividad.", tema: "ADN del Gerente" },
+  { q: "¿En qué se basa el 'Pilar 1' de la acción gerencial según el ADN del Gerente?", opts: ["En los roles de Mintzberg","En las habilidades de Robert L. Katz","En las funciones administrativas de Henri Fayol","En la teoría de la motivación de Maslow"], ans: 2, exp: "El Pilar 1 (Funciones / El Proceso) está basado en Henri Fayol: lo que hacen los gerentes — planeación, organización, dirección y control.", tema: "ADN del Gerente" },
+  { q: "¿En qué se basa el 'Pilar 2' de la acción gerencial según el ADN del Gerente?", opts: ["En las funciones de Henri Fayol","En los roles de Henry Mintzberg","En las habilidades de Robert L. Katz","En la administración científica de Taylor"], ans: 1, exp: "El Pilar 2 (Roles / El Comportamiento) está basado en Henry Mintzberg: cómo actúan los gerentes, alternando entre reflexión y acción.", tema: "ADN del Gerente" },
+  { q: "¿Cuántos roles identificó Mintzberg para los gerentes y en qué tres categorías se agrupan?", opts: ["5 roles en 2 categorías: interpersonales e informativos","10 roles en 3 categorías: interpersonales, informativos y decisorios","8 roles en 4 categorías","7 roles en 3 categorías: estratégicos, tácticos y operativos"], ans: 1, exp: "Mintzberg identificó 10 roles en 3 categorías: Interpersonales (Representante, Líder, Enlace), Informativos (Monitor, Difusor, Portavoz) y Decisorios (Emprendedor, Manejador de problemas, Asignador de recursos, Negociador).", tema: "ADN del Gerente" },
+  { q: "¿Qué confirman los datos de Gallup y Watson Wyatt sobre la importancia de los gerentes?", opts: ["Que el salario es el factor #1 en la productividad","Que el gerente directo es la variable #1 en la lealtad y productividad de los empleados","Que la tecnología reemplazará a los gerentes","Que la estructura organizacional determina el rendimiento financiero"], ans: 1, exp: "Datos de Gallup y Watson Wyatt confirman que el gerente directo es la variable #1 en la lealtad y productividad de los empleados, incidiendo directamente en el rendimiento financiero.", tema: "ADN del Gerente" },
+  { q: "¿Cuáles son los tres elementos que componen una organización según el modelo del 'Ecosistema'?", opts: ["Recursos, procesos y resultados","Propósito definido, estructura deliberada y personas","Misión, visión y valores","Estrategia, cultura y liderazgo"], ans: 1, exp: "Los tres elementos son: Propósito Definido (metas y objetivos claros), Estructura Deliberada (las reglas y acuerdos) y Personas (el talento humano que realiza el trabajo).", tema: "ADN del Gerente" },
+  { q: "¿Cuál es la 'paradoja del control' mencionada en La Realidad del Trabajo Gerencial?", opts: ["El gerente controla todo pero nadie lo controla a él","Tu éxito como gerente depende enteramente del desempeño de otros","El control aumenta la burocracia innecesariamente","El gerente que más controla obtiene mejores resultados"], ans: 1, exp: "La paradoja del control dice que el éxito del gerente depende enteramente del desempeño de otros, lo que es uno de los principales retos del trabajo gerencial.", tema: "ADN del Gerente" },
+  { q: "¿Qué rol introduce la división del trabajo según Adam Smith en 1776?", opts: ["La administración científica","La especialización para multiplicar la productividad","La estructura matricial","El liderazgo transformacional"], ans: 1, exp: "En 1776, Adam Smith en 'La riqueza de las naciones' introdujo la división del trabajo para multiplicar la productividad mediante la especialización.", tema: "ADN del Gerente" },
+
+  // GLOSARIO
+  { q: "¿Qué significa el acrónimo VUCA?", opts: ["Valor, Utilidad, Capacidad y Adaptación","Volatilidad, Incertidumbre (Uncertainty), Complejidad y Ambigüedad","Visión, Unidad, Competencia y Acción","Velocidad, Urgencia, Control y Análisis"], ans: 1, exp: "VUCA es el acrónimo de Volatilidad, Incertidumbre (Uncertainty), Complejidad y Ambigüedad; marco conceptual para contextualizar los entornos macroeconómicos actuales.", tema: "Glosario" },
+  { q: "¿Qué es el Balanced Scorecard (Cuadro de Mando Integral)?", opts: ["Un estado financiero que resume las ganancias anuales","Una herramienta de gestión estratégica que evalúa el desempeño desde 4 perspectivas: financiera, clientes, procesos internos y aprendizaje","Un sistema de control de calidad en producción","Un modelo de liderazgo basado en resultados cuantitativos"], ans: 1, exp: "El Balanced Scorecard o Cuadro de Mando Integral evalúa el desempeño desde cuatro perspectivas: financiera, clientes, procesos internos y aprendizaje/crecimiento.", tema: "Glosario" },
+  { q: "¿Qué es el Empowerment?", opts: ["Estrategia de fusión y adquisición de empresas","Estrategia de gestión que delega autoridad, responsabilidad y toma de decisiones a los niveles jerárquicos inferiores","Modelo financiero para calcular el ROI","Proceso de contratación de personal externo"], ans: 1, exp: "El Empowerment es una estrategia de gestión operacional que delega autoridad, responsabilidad y toma de decisiones a los niveles jerárquicos inferiores.", tema: "Glosario" },
+  { q: "¿Qué es la Innovación Disruptiva?", opts: ["Mejora incremental de un producto existente en el mercado líder","Proceso en el que un producto se posiciona inicialmente en la parte inferior de un mercado y eventualmente desplaza a los competidores consolidados","Estrategia de fusión entre empresas competidoras","Rediseño radical de procesos para reducir costos"], ans: 1, exp: "La Innovación Disruptiva es el proceso por el cual un producto o servicio se posiciona inicialmente en la parte inferior de un mercado y eventualmente desplaza a los competidores consolidados.", tema: "Glosario" },
+  { q: "¿Qué es el Lean Management?", opts: ["Estrategia de expansión global de la empresa","Filosofía de producción y gestión enfocada en la eliminación sistemática de desperdicios (muda) y maximización del valor al cliente","Modelo de contratación y selección de personal","Sistema de evaluación de desempeño basado en objetivos"], ans: 1, exp: "Lean Management es una filosofía de producción y gestión enfocada en la eliminación sistemática de desperdicios (muda) y la maximización del valor entregado al cliente.", tema: "Glosario" },
+  { q: "¿Qué es la Resiliencia Organizacional?", opts: ["Capacidad de crecer rápidamente en nuevos mercados","Capacidad de una entidad para anticipar, prepararse, responder y adaptarse a cambios e interrupciones repentinas","Estrategia para reducir costos operativos","Proceso de reestructuración financiera en crisis"], ans: 1, exp: "La Resiliencia Organizacional es la capacidad de una entidad para anticipar, prepararse, responder y adaptarse a cambios incrementales y interrupciones repentinas.", tema: "Glosario" },
+  { q: "¿Qué es el Outsourcing Estratégico?", opts: ["Expansión internacional de una empresa hacia nuevos mercados","Subcontratación de actividades no esenciales (non-core) a terceros especializados para enfocar la capacidad interna en las competencias clave","Proceso de fusión de dos empresas competidoras","Transferencia de tecnología entre subsidiarias de una corporación"], ans: 1, exp: "El Outsourcing Estratégico es la subcontratación de actividades no esenciales (non-core) a terceros especializados para que la empresa pueda enfocarse en sus competencias clave.", tema: "Glosario" },
+  { q: "¿Qué mide el ROI (Return on Investment)?", opts: ["La eficiencia operativa de los procesos de producción","El beneficio o utilidad obtenida en relación con la cantidad de dinero invertida","La velocidad de crecimiento de una empresa en el mercado","El nivel de satisfacción de los clientes con un producto"], ans: 1, exp: "El ROI (Retorno de la Inversión) es la razón financiera que mide el beneficio o utilidad obtenida en relación con la cantidad de dinero invertida.", tema: "Glosario" },
+  { q: "¿Qué es la Gestión del Cambio (Change Management)?", opts: ["Sistema de control financiero para auditorías externas","Enfoque estructurado para operacionalizar la transición de individuos, equipos y organizaciones desde un estado actual a un estado futuro deseado","Proceso de fusión entre departamentos internos","Estrategia de marketing para lanzar nuevos productos"], ans: 1, exp: "La Gestión del Cambio es un enfoque estructurado para operacionalizar la transición de individuos, equipos y organizaciones desde un estado actual a un estado futuro deseado.", tema: "Glosario" },
+  { q: "¿Qué es la Scalability (Escalabilidad) de un modelo de negocio?", opts: ["Capacidad de una empresa para contratar más personal proporcionalmente a su crecimiento","Propiedad de un modelo de negocio para incrementar producción y ventas de forma exponencial sin un aumento proporcional en costos fijos","Estrategia de expansión internacional de una empresa","Proceso de diversificación de productos en un nuevo mercado"], ans: 1, exp: "La Escalabilidad (Scalability) es la propiedad de un modelo de negocio para incrementar su producción y ventas de forma exponencial sin un aumento proporcional en sus costos fijos.", tema: "Glosario" },
+  { q: "¿Qué es la Gobernanza Corporativa?", opts: ["El departamento encargado de las relaciones públicas","Sistema de reglas, prácticas y procesos mediante los cuales se dirige y controla una empresa, equilibrando los intereses de accionistas, directivos y grupos de interés","La estrategia de expansión hacia nuevos mercados internacionales","El conjunto de políticas de recursos humanos de una organización"], ans: 1, exp: "La Gobernanza Corporativa es el sistema de reglas, prácticas y procesos mediante los cuales se dirige y controla una empresa, equilibrando los intereses de accionistas, directivos y grupos de interés.", tema: "Glosario" },
+  { q: "¿Qué son las Metodologías Ágiles?", opts: ["Técnicas de reducción de costos operativos en manufactura","Marcos de trabajo como Scrum o Kanban basados en el desarrollo iterativo e incremental, la adaptabilidad y la entrega rápida de valor","Sistemas de gestión de calidad total (TQM) en producción","Modelos financieros para evaluar inversiones a largo plazo"], ans: 1, exp: "Las Metodologías Ágiles son marcos de trabajo (como Scrum o Kanban) basados en el desarrollo iterativo e incremental, la adaptabilidad y la entrega rápida de valor.", tema: "Glosario" },
+];
+
+let questions = [], current = 0, score = 0, correct = 0, answered = false;
+const icons = ['A','B','C','D'];
+const iconClasses = ['icon-a','icon-b','icon-c','icon-d'];
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+function startGame() {
+  questions = shuffle(allQuestions);
+  current = 0; score = 0; correct = 0; answered = false;
+  show('game-screen'); renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById('prog-text').textContent = `Pregunta ${current+1} de ${questions.length}`;
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('prog-bar').style.width = `${Math.round(((current+1)/questions.length)*100)}%`;
+  document.getElementById('q-num').textContent = `Pregunta ${current+1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-theme').textContent = q.tema;
+  const grid = document.getElementById('answers');
+  grid.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = `<span class="ans-icon ${iconClasses[i]}">${icons[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    grid.appendChild(btn);
+  });
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'none'; fb.className = 'feedback';
+  document.getElementById('next-btn').style.display = 'none';
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const btns = document.querySelectorAll('.answer-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+  if (idx === q.ans) {
+    score += 100; correct++;
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = `<strong>✓ ¡Correcto! +100 pts</strong> — ${q.exp}`;
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.ans].classList.add('reveal-correct');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `<strong>✗ Incorrecto.</strong> Correcta: <strong>${q.opts[q.ans]}</strong>. ${q.exp}`;
+  }
+  fb.style.display = 'block';
+  document.getElementById('score-display').textContent = score;
+  const nb = document.getElementById('next-btn');
+  nb.style.display = 'block';
+  nb.textContent = current < questions.length - 1 ? 'Siguiente →' : 'Ver resultados →';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) showEnd();
+  else renderQuestion();
+}
+
+function showEnd() {
+  show('end-screen');
+  const pct = Math.round((correct / questions.length) * 100);
+  let trophy = '🏆', msg = '"¡Excelente! Dominas los fundamentos de la Administración."';
+  if (pct < 50) { trophy = '📖'; msg = '"Sigue repasando las diapositivas y el glosario — ¡puedes mejorar!"'; }
+  else if (pct < 80) { trophy = '⭐'; msg = '"¡Buen trabajo! Repasa los temas donde fallaste."'; }
+  document.getElementById('trophy').textContent = trophy;
+  document.getElementById('end-score').textContent = `${score} pts`;
+  document.getElementById('end-sub').textContent = `${correct} de ${questions.length} correctas`;
+  document.getElementById('s-correct').textContent = correct;
+  document.getElementById('s-wrong').textContent = questions.length - correct;
+  document.getElementById('s-pct').textContent = pct + '%';
+  document.getElementById('end-msg').textContent = msg;
+}
+
+function restartGame() { startGame(); }
+</script>
+</body>
+</html>
